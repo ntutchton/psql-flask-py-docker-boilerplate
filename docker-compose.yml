@@ -1,0 +1,39 @@
+# to clear up images
+# docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
+
+version: '3'
+services:
+  api:
+    build: .
+    container_name: metrics_api
+    hostname: metrics_selfservice
+    command: python src/main.py
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - './:/app'
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+
+  db:
+    container_name: metrics_db
+    hostname: metrics_selfservice
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB: metrics_db
+      POSTGRES_USER: metrics_user
+      POSTGRES_PASSWORD: metrics_pw
+    ports:
+        - 5432:5432
+    # restart: always
+    volumes:
+      - "db_data:/var/lib/postgresql/data"
+volumes:
+    db_data:
